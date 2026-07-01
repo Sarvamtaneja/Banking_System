@@ -24,7 +24,7 @@ const ledgerSchema = new mongoose.Schema({
     type: {
         type: String,
         enum:{
-            status: ["CREDIT", "DEBIT"],
+            values: ["CREDIT", "DEBIT"],
             message: "Type can either be CREDIT or DEBIT"
         },
         required:[true, "Ledger type is required"],
