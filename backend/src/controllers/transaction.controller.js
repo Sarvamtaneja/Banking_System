@@ -99,58 +99,73 @@ async function createTransaction(req,res) {
      * -Create transaction 
      */
 
-    const session = await mongoose.startSession();
-    session.startTransaction();  
+    let transaction;
+
+    try{
+        const session = await mongoose.startSession();
+        session.startTransaction();  
         
-    const transaction = new transactionModel({
-        fromAccount,
-        toAccount,
-        amount,
-        idempotencyKey,
-        status: "PENDING"
-    });
+        transaction = (await transactionModel.create([{
+            fromAccount,
+            toAccount,
+            amount,
+            idempotencyKey,
+            status: "PENDING"
+        }], {session}))[ 0 ]
 
-    /**
-     * -Create debit ledger entry
-     */
+        /**
+         * -Create debit ledger entry
+         */
 
-    const debitLedgerEntry = await ledgerModel.create([{
-        account: fromAccount,
-        amount: amount,
-        transaction: transaction._id,
-        type: "DEBIT"
-    }],{ session });
+        const debitLedgerEntry = await ledgerModel.create([{
+            account: fromAccount,
+            amount: amount,
+            transaction: transaction._id,
+            type: "DEBIT"
+        }],{ session });
 
-    /**
-     * -Create credit ledger entry
-     */
+        /**
+         * -Create credit ledger entry
+        */
 
-    const creditLedgerEntry = await ledgerModel.create([{
-        account: toAccount,
-        amount: amount,
-        transaction: transaction._id,
-        type: "CREDIT"
-    }], { session });
+        const creditLedgerEntry = await ledgerModel.create([{
+            account: toAccount,
+            amount: amount,
+            transaction: transaction._id,
+            type: "CREDIT"
+        }], { session });
 
-    /**
-     * -Change status to completed
-     */
+        /**
+         * -Change status to completed
+         */
 
-    transaction.status = "COMPLETED";
-    await transaction.save({ session });
+        await transactionModel.findOneAndUpdate(
+            {_id: transaction._id},
+            {status: "COMPLETED"},
+            {session}
+        )
 
-    /**
-     * Commit changes in MongoDB
-     */
+        /**
+         * Commit changes in MongoDB
+         */
 
-    await session.commitTransaction()
-    session.endSession();
+        await session.commitTransaction()
+        session.endSession();
+    }catch (error){
+
+        console.log(error);
+
+        return res.status(400).json({
+            message: "Transaction is pending due to some issue, please try again after sometime"
+        })
+
+    }
 
     /**
      * -Send an email
      */
 
-    //await emailService.sendTransactionEmail(req.user.email, req.user.name, amount, toAccount);
+    await emailService.sendTransactionEmail(req.user.email, req.user.name, amount, toAccount);
 
     return res.status(201).json({
         message: "Transaction completed Successfully",
