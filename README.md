@@ -14,6 +14,7 @@ Designed to simulate real-world banking workflows following REST API principles 
 ## 📑 Table of Contents
 
 - [Features](#-features)
+- [Postman documentation](#-api-documentation-on-postman)
 - [Tech Stack](#-tech-stack)
 - [Project Structure](#-project-structure)
 - [API Endpoints](#-api-endpoints)
@@ -57,6 +58,18 @@ This guarantees accurate balance computation and full auditability.
 - Welcome email on registration
 - Transaction confirmation emails
 - HTML templates via Nodemailer
+
+---
+
+## 📘 API Documentation on Postman
+
+Full request/response examples, sample payloads, and try-it-out functionality are available via Postman:
+
+| Collection | Description | Link |
+|------------|-------------|------|
+| Authentication API | Register & login endpoints | [View Docs](https://documenter.getpostman.com/view/48282940/2sBY4HTitr) |
+| Accounts API | Account creation & balance retrieval | [View Docs](https://documenter.getpostman.com/view/48282940/2sBY4HTitq) |
+| Transactions API | Fund transfers & initial deposits | [View Docs](https://documenter.getpostman.com/view/48282940/2sBY4HTitt) |
 
 ---
 
