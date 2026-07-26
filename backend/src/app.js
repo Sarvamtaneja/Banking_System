@@ -14,7 +14,7 @@ app.use(cookieParser());
 
 app.use(cors({ origin: [
     "http://localhost:5173",
-    "https://ledgerline-lovat.vercel.app/"
+    process.env.FRONTEND_API
 ], credentials: true }));
 
 app.get("/", (req,res)=>{
