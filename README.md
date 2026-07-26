@@ -1,4 +1,4 @@
-# 🏦 ST Banking System
+# 🏦 Ledgerline Banking System
 
 A secure, ledger-based backend banking application built with **Node.js**, **Express.js**, and **MongoDB** — implementing authentication, account management, idempotent transactions, and email notifications.
 
