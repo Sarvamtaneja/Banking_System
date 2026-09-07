@@ -8,37 +8,54 @@ const tokenBlackListModel = require("../models/blackList.model")
  * - POST /api/auth/register
  */
 async function userRegisterController(req,res){
-    const {email, password, name} = req.body;
+    try{
+        const {email, password, name} = req.body;
 
-    const doesUserExist = await userModel.findOne({
-        email:email
-    })
+        if(!name || !email || !password){
+            return res.status(400).json({
+                message:"Email, password and name are required",
+                status: "failed"
+            })
+        }
 
-    if(doesUserExist){
-        return res.status(402).json({
-            message:"User already exists with email",
-            status:"failed"
+        const doesUserExist = await userModel.findOne({
+            email:email
         })
+
+        if(doesUserExist){
+            return res.status(402).json({
+                message:"User already exists with email",
+                status:"failed"
+            })
+        }
+
+        const user = await userModel.create({
+            email, password, name
+        })
+
+
+        const token = jwt.sign({userId:user._id},process.env.JWT_SECRET, {expiresIn:"3d"});
+
+        res.cookie("token", token, { httpOnly: true, secure: true, sameSite: "none" });
+
+        res.status(201).json({
+            user:{
+                _id: user._id,
+                email: user.email,
+                name: user.name
+            },
+            token
+        })
+
+        await emailService.sendRegistrationEmail(user.email, user.name);
+    }catch (error) {
+        console.error("REGISTER ERROR:", error);
+
+        return res.status(500).json({
+            message: "Registration failed",
+            error: error.message
+        });
     }
-
-    const user = await userModel.create({
-        email, password, name
-    })
-
-    const token = jwt.sign({userId:user._id},process.env.JWT_SECRET, {expiresIn:"3d"});
-
-    res.cookie("token", token, { httpOnly: true, secure: true, sameSite: "none" });
-
-    res.status(201).json({
-        user:{
-            _id: user._id,
-            email: user.email,
-            name: user.name
-        },
-        token
-    })
-
-    await emailService.sendRegistrationEmail(user.email, user.name);
 }
 
 /**
