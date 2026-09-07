@@ -97,3 +97,107 @@ describe("Authentication API", () => {
 
 });
 
+describe("POST /api/auth/login", () => {
+
+    test("should login with valid credentials", async () => {
+
+        // Creating a user first
+        await request(app)
+            .post("/api/auth/register")
+            .send({
+                name: "Login Test User",
+                email: "login@example.com",
+                password: "password123"
+            });
+
+        // Trying to login
+        const response = await request(app)
+            .post("/api/auth/login")
+            .send({
+                email: "login@example.com",
+                password: "password123"
+            });
+
+        expect(response.statusCode).toBe(200);
+
+        expect(response.body).toHaveProperty("user");
+        expect(response.body).toHaveProperty("token");
+
+        expect(response.body.user.email)
+            .toBe("login@example.com");
+
+        expect(response.body.user.name)
+            .toBe("Login Test User");
+
+        expect(response.body.token)
+            .toBeDefined();
+    });
+
+    test("should reject login with incorrect password", async () => {
+
+        await request(app)
+            .post("/api/auth/register")
+            .send({
+                name: "Wrong Password User",
+                email: "wrongpassword@example.com",
+                password: "password123"
+            });
+
+        const response = await request(app)
+            .post("/api/auth/login")
+            .send({
+                email: "wrongpassword@example.com",
+                password: "wrongpassword"
+            });
+
+        expect(response.statusCode).toBe(401);
+
+        expect(response.body.message)
+            .toBe("email or password is INVALID");
+    });
+
+    test("should reject login when user does not exist", async () => {
+
+        const response = await request(app)
+            .post("/api/auth/login")
+            .send({
+                email: "doesnotexist@example.com",
+                password: "password123"
+            });
+
+        expect(response.statusCode).toBe(401);
+
+        expect(response.body.message)
+            .toBe("email or password is INVALID");
+    });
+
+    test("should reject login when email is missing", async () => {
+
+        const response = await request(app)
+            .post("/api/auth/login")
+            .send({
+                password: "password123"
+            });
+
+        expect(response.statusCode).toBe(401);
+
+        expect(response.body.message)
+            .toBe("email or password is INVALID");
+    });
+
+    test("should reject login when password is missing", async () => {
+
+        const response = await request(app)
+            .post("/api/auth/login")
+            .send({
+                email: "login@example.com"
+            });
+
+        expect(response.statusCode).toBe(401);
+
+        expect(response.body.message)
+            .toBe("email or password is INVALID");
+    });
+
+});
+
