@@ -227,12 +227,6 @@ describe("Account to Account Transaction", () => {
                 idempotencyKey: "transfer-test-001"
             });
 
-        console.log("TRANSACTION STATUS:", transactionResponse.statusCode);
-        console.log("TRANSACTION BODY:", transactionResponse.body);
-        console.log("TRANSACTION TEXT:", transactionResponse.text);
-
-
-
         expect(transactionResponse.statusCode).toBe(201);
 
         expect(transactionResponse.body)
@@ -242,9 +236,6 @@ describe("Account to Account Transaction", () => {
             .toBe("COMPLETED");
 
 
-        // --------------------------------------------------
-        // 9. Verify ledger entries
-        // --------------------------------------------------
 
         const ledgerEntries = await ledgerModel.find({
             transaction: transactionResponse.body.transaction._id
@@ -279,10 +270,6 @@ describe("Account to Account Transaction", () => {
         expect(creditEntry.amount).toBe(2000);
 
 
-        // --------------------------------------------------
-        // 10. Verify sender balance
-        // --------------------------------------------------
-
         const senderBalanceResponse = await request(app)
             .get(`/api/accounts/balance/${senderAccount._id}`)
             .set("Authorization", `Bearer ${senderToken}`);
@@ -292,10 +279,6 @@ describe("Account to Account Transaction", () => {
         expect(senderBalanceResponse.body.balance).toBe(8000);
 
 
-        // --------------------------------------------------
-        // 11. Login as receiver
-        // --------------------------------------------------
-
         const receiverLoginResponse = await request(app)
             .post("/api/auth/login")
             .send({
@@ -304,11 +287,6 @@ describe("Account to Account Transaction", () => {
             });
 
         const receiverToken = receiverLoginResponse.body.token;
-
-
-        // --------------------------------------------------
-        // 12. Verify receiver balance
-        // --------------------------------------------------
 
         const receiverBalanceResponse = await request(app)
             .get(`/api/accounts/balance/${receiverAccount._id}`)
