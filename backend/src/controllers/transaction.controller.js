@@ -145,6 +145,8 @@ async function createTransaction(req,res) {
             {session}
         )
 
+        transaction.status = "COMPLETED";
+
         /**
          * Commit changes in MongoDB
          */
